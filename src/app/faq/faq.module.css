@@ -1,0 +1,45 @@
+.page { padding: var(--space-8) 0 var(--space-24); min-height: 100vh; }
+.header { text-align: center; padding: var(--space-8) 0 var(--space-6); }
+.header h1 { margin-bottom: var(--space-5); }
+.searchInput {
+  width: 100%; max-width: 480px; padding: var(--space-3) var(--space-5);
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-full); color: var(--white); font-size: var(--text-sm);
+  outline: none; transition: border-color var(--transition-fast);
+}
+.searchInput:focus { border-color: var(--accent-cyan); }
+.searchInput::placeholder { color: var(--gray-600); }
+
+.categoryTabs { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-8); justify-content: center; }
+.catTab {
+  padding: var(--space-2) var(--space-4); font-size: var(--text-xs); font-weight: 500;
+  border-radius: var(--radius-full); background: rgba(255,255,255,0.03); color: var(--gray-500);
+  border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all var(--transition-fast);
+}
+.catTab:hover { color: var(--gray-300); border-color: rgba(255,255,255,0.12); }
+.catTabActive { background: rgba(0,212,255,0.1); color: var(--accent-cyan); border-color: rgba(0,212,255,0.2); }
+
+.faqList { display: flex; flex-direction: column; gap: var(--space-6); }
+.catTitle { font-size: var(--text-lg); margin-bottom: var(--space-3); color: var(--accent-cyan); }
+
+.faqItem {
+  border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-lg);
+  overflow: hidden; margin-bottom: var(--space-2);
+}
+
+.faqQuestion {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-5); background: rgba(255,255,255,0.02);
+  color: var(--white); font-size: var(--text-sm); font-weight: 500;
+  text-align: left; cursor: pointer; border: none; gap: var(--space-3);
+  transition: background var(--transition-fast);
+}
+.faqQuestion:hover { background: rgba(255,255,255,0.04); }
+
+.faqChevron { color: var(--gray-500); transition: transform var(--transition-base); flex-shrink: 0; }
+.faqChevronOpen { transform: rotate(180deg); }
+
+.faqAnswer { padding: 0 var(--space-5); overflow: hidden; }
+.faqAnswer p { padding: var(--space-3) 0 var(--space-5); font-size: var(--text-sm); color: var(--gray-400); line-height: 1.7; }
+
+.empty { text-align: center; color: var(--gray-600); padding: var(--space-12); }

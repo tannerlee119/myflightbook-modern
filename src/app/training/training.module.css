@@ -1,0 +1,61 @@
+.page { padding: var(--space-8) 0 var(--space-24); min-height: 100vh; }
+.header { padding: var(--space-8) 0 var(--space-4); }
+.subtitle { color: var(--gray-500); font-size: var(--text-sm); margin-top: var(--space-1); }
+.sectionTitle { font-size: var(--text-2xl); margin-bottom: var(--space-6); }
+
+/* Ratings */
+.ratingsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+
+.ratingCard {
+  padding: var(--space-6); border-radius: var(--radius-xl);
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+}
+
+.ratingTop { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); }
+.ring { display: block; }
+.ratingName { font-size: var(--text-base); font-weight: 600; text-align: center; }
+
+.requirements { display: flex; flex-direction: column; gap: var(--space-3); }
+.reqRow { display: flex; flex-direction: column; gap: 4px; }
+.reqInfo { display: flex; justify-content: space-between; align-items: baseline; }
+.reqLabel { font-size: var(--text-xs); color: var(--gray-500); }
+.reqValues { font-size: var(--text-xs); color: var(--gray-400); font-family: var(--font-mono); }
+.reqBar { height: 3px; background: rgba(255,255,255,0.04); border-radius: var(--radius-full); overflow: hidden; }
+.reqBarFill { height: 100%; border-radius: var(--radius-full); transition: width 0.8s ease-out; }
+
+/* Endorsements */
+.endorsementList { display: flex; flex-direction: column; gap: var(--space-3); padding-left: var(--space-4); border-left: 2px solid rgba(255,255,255,0.05); }
+.endorsementItem { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-2) 0; }
+.endorseDot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-cyan); flex-shrink: 0; margin-top: 4px; margin-left: calc(-1 * var(--space-4) - 6px); }
+.endorseTitle { display: block; font-weight: 500; color: var(--white); font-size: var(--text-sm); }
+.endorseMeta { display: block; font-size: var(--text-xs); color: var(--gray-500); margin-top: 2px; }
+
+/* Achievements */
+.achieveGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+
+.achieveCard {
+  position: relative; padding: var(--space-6); border-radius: var(--radius-lg);
+  text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  transition: all var(--transition-base);
+}
+
+.achieveUnlocked {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(0,212,255,0.15);
+}
+.achieveUnlocked:hover { transform: translateY(-3px); box-shadow: 0 0 20px rgba(0,212,255,0.1); }
+
+.achieveLocked {
+  background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04);
+  opacity: 0.5;
+}
+
+.achieveIcon { font-size: 2rem; }
+.achieveName { font-weight: 600; color: var(--white); font-size: var(--text-sm); }
+.achieveDesc { font-size: var(--text-xs); color: var(--gray-500); }
+.achieveLock { position: absolute; top: var(--space-3); right: var(--space-3); font-size: 0.8rem; }
+
+@media (max-width: 768px) {
+  .ratingsGrid { grid-template-columns: 1fr; }
+  .achieveGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) { .achieveGrid { grid-template-columns: 1fr; } }
