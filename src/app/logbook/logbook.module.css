@@ -89,6 +89,19 @@
 
 .saveBtn { width: 100%; margin-top: var(--space-2); }
 
+.costDivider {
+  display: flex; align-items: center; gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+}
+.costDivider::before, .costDivider::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+.costDivider span {
+  font-size: var(--text-xs); color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+}
+
 /* Delete Confirm */
 .confirmBox { background: var(--black-card); border: 1px solid rgba(255,68,68,0.2); border-radius: var(--radius-xl); padding: var(--space-8); text-align: center; max-width: 380px; }
 .confirmBox p { color: var(--gray-300); margin-bottom: var(--space-5); }

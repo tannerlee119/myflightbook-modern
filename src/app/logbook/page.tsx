@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   getFlights, addFlight, updateFlight, deleteFlight,
   getAircraft, computeTotals, computeCurrency,
+  getFlightCosts, addFlightCost, updateFlightCost,
   type Flight, type Aircraft as AircraftType, type FlightTotals, type CurrencyItem,
 } from '@/lib/storage';
 import styles from './logbook.module.css';
@@ -17,6 +18,8 @@ const EMPTY_FORM = {
   totalTime: 0, pic: 0, sic: 0, dual: 0,
   night: 0, instrument: 0, simInstrument: 0, crossCountry: 0,
   landings: 0, nightLandings: 0, approaches: 0, comments: '',
+  // Cost fields (optional — only creates cost entry if any > 0)
+  fuelCost: 0, rentalCost: 0, instructorCost: 0, landingFees: 0, otherCost: 0,
 };
 
 export default function LogbookPage() {
@@ -49,12 +52,19 @@ export default function LogbookPage() {
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setModalOpen(true); };
   const openEdit = (f: Flight) => {
     setEditingId(f.id);
+    // Find linked cost
+    const linkedCost = getFlightCosts().find((c) => c.flightId === f.id);
     setForm({
       date: f.date, aircraft: f.aircraft, model: f.model, route: f.route,
       totalTime: f.totalTime, pic: f.pic, sic: f.sic, dual: f.dual,
       night: f.night, instrument: f.instrument, simInstrument: f.simInstrument,
       crossCountry: f.crossCountry, landings: f.landings, nightLandings: f.nightLandings,
       approaches: f.approaches, comments: f.comments,
+      fuelCost: linkedCost?.fuelCost ?? 0,
+      rentalCost: linkedCost?.rentalCost ?? 0,
+      instructorCost: linkedCost?.instructorCost ?? 0,
+      landingFees: linkedCost?.landingFees ?? 0,
+      otherCost: linkedCost?.otherCost ?? 0,
     });
     setModalOpen(true);
   };
@@ -67,12 +77,33 @@ export default function LogbookPage() {
       const ac = aircraft.find((a) => a.tailNumber === form.aircraft);
       if (ac) model = ac.model;
     }
-    const payload = { ...form, model };
+    const { fuelCost, rentalCost, instructorCost, landingFees, otherCost, ...flightFields } = form;
+    const payload = { ...flightFields, model };
+    let flightId = editingId;
+
     if (editingId) {
       updateFlight(editingId, payload);
     } else {
-      addFlight(payload);
+      const created = addFlight(payload);
+      flightId = created.id;
     }
+
+    // Auto-create/update linked cost if any cost field is filled
+    const hasCost = fuelCost > 0 || rentalCost > 0 || instructorCost > 0 || landingFees > 0 || otherCost > 0;
+    if (hasCost && flightId) {
+      const existingCost = getFlightCosts().find((c) => c.flightId === flightId);
+      const costData = {
+        flightId, date: form.date, aircraft: form.aircraft,
+        fuelCost, rentalCost, instructorCost, landingFees, otherCost,
+        notes: form.route || '',
+      };
+      if (existingCost) {
+        updateFlightCost(existingCost.id, costData);
+      } else {
+        addFlightCost(costData);
+      }
+    }
+
     setModalOpen(false);
     reload();
   };
@@ -258,6 +289,21 @@ export default function LogbookPage() {
                   <div className={styles.fg}><label>Approaches</label><input type="number" value={form.approaches || ''} onChange={(e) => numField('approaches', e.target.value)} /></div>
                 </div>
                 <div className={styles.fg}><label>Comments</label><textarea rows={2} value={form.comments} onChange={(e) => setField('comments', e.target.value)} placeholder="Flight notes…" /></div>
+
+                {/* Cost Section */}
+                <div className={styles.costDivider}>
+                  <span>Cost (optional)</span>
+                </div>
+                <div className={styles.formRow3}>
+                  <div className={styles.fg}><label>Fuel $</label><input type="number" step="0.01" value={form.fuelCost || ''} onChange={(e) => numField('fuelCost', e.target.value)} placeholder="0" /></div>
+                  <div className={styles.fg}><label>Rental $</label><input type="number" step="0.01" value={form.rentalCost || ''} onChange={(e) => numField('rentalCost', e.target.value)} placeholder="0" /></div>
+                  <div className={styles.fg}><label>Instructor $</label><input type="number" step="0.01" value={form.instructorCost || ''} onChange={(e) => numField('instructorCost', e.target.value)} placeholder="0" /></div>
+                </div>
+                <div className={styles.formRow}>
+                  <div className={styles.fg}><label>Landing Fees $</label><input type="number" step="0.01" value={form.landingFees || ''} onChange={(e) => numField('landingFees', e.target.value)} placeholder="0" /></div>
+                  <div className={styles.fg}><label>Other $</label><input type="number" step="0.01" value={form.otherCost || ''} onChange={(e) => numField('otherCost', e.target.value)} placeholder="0" /></div>
+                </div>
+
                 <button className={`btn btn-primary ${styles.saveBtn}`} onClick={handleSave}>{editingId ? 'Save Changes' : 'Log Flight'}</button>
               </div>
             </motion.div>
