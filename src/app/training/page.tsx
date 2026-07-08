@@ -24,6 +24,68 @@ function ProgressRing({ progress, color, size = 110 }: { progress: number; color
   );
 }
 
+interface Requirement { label: string; cur: number; req: number; unit: string }
+interface Certificate {
+  name: string; subtitle: string; color: string; far: string; reqs: Requirement[];
+}
+
+function buildCertificates(t: FlightTotals): Certificate[] {
+  return [
+    {
+      name: 'Private Pilot (PPL)',
+      subtitle: 'FAR 61.109',
+      color: 'var(--accent-emerald)',
+      far: '61.109',
+      reqs: [
+        { label: 'Total Flight Time', cur: t.totalTime, req: 40, unit: 'hrs' },
+        { label: 'Dual Instruction', cur: t.dual, req: 20, unit: 'hrs' },
+        { label: 'Solo / PIC Time', cur: t.pic, req: 10, unit: 'hrs' },
+        { label: 'Night Flight', cur: t.night, req: 3, unit: 'hrs' },
+        { label: 'Night Landings (full-stop)', cur: t.nightLandings, req: 10, unit: '' },
+        { label: 'Instrument Training', cur: t.instrument + t.simInstrument, req: 3, unit: 'hrs' },
+        { label: 'Cross-Country (dual)', cur: t.crossCountry, req: 3, unit: 'hrs' },
+      ],
+    },
+    {
+      name: 'Instrument Rating (IR)',
+      subtitle: 'FAR 61.65',
+      color: 'var(--accent-cyan)',
+      far: '61.65',
+      reqs: [
+        { label: 'Instrument Flight Time', cur: t.instrument + t.simInstrument, req: 40, unit: 'hrs' },
+        { label: 'Cross-Country PIC', cur: t.crossCountry, req: 50, unit: 'hrs' },
+        { label: 'Instrument Approaches', cur: t.approaches, req: 0, unit: '' },
+      ],
+    },
+    {
+      name: 'Commercial Pilot (CPL)',
+      subtitle: 'FAR 61.129',
+      color: 'var(--accent-amber)',
+      far: '61.129',
+      reqs: [
+        { label: 'Total Flight Time', cur: t.totalTime, req: 250, unit: 'hrs' },
+        { label: 'PIC Time', cur: t.pic, req: 100, unit: 'hrs' },
+        { label: 'PIC Cross-Country', cur: t.crossCountry, req: 50, unit: 'hrs' },
+        { label: 'Instrument Time', cur: t.instrument + t.simInstrument, req: 10, unit: 'hrs' },
+        { label: 'Night PIC', cur: t.night, req: 5, unit: 'hrs' },
+      ],
+    },
+    {
+      name: 'Airline Transport Pilot (ATP)',
+      subtitle: 'FAR 61.159',
+      color: 'var(--accent-purple)',
+      far: '61.159',
+      reqs: [
+        { label: 'Total Flight Time', cur: t.totalTime, req: 1500, unit: 'hrs' },
+        { label: 'PIC Time', cur: t.pic, req: 250, unit: 'hrs' },
+        { label: 'Cross-Country Time', cur: t.crossCountry, req: 500, unit: 'hrs' },
+        { label: 'Night Time', cur: t.night, req: 100, unit: 'hrs' },
+        { label: 'Instrument Time', cur: t.instrument + t.simInstrument, req: 75, unit: 'hrs' },
+      ],
+    },
+  ];
+}
+
 export default function TrainingPage() {
   const [totals, setTotals] = useState<FlightTotals | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -35,85 +97,107 @@ export default function TrainingPage() {
 
   if (!mounted || !totals) return <div className={styles.page} />;
 
-  const t = totals;
-
-  const ratings = [
-    { name: 'Private Pilot', color: 'var(--accent-emerald)', reqs: [
-      { label: 'Total Time', cur: t.totalTime, req: 40 },
-      { label: 'Solo/PIC', cur: t.pic, req: 10 },
-      { label: 'Cross-Country', cur: t.crossCountry, req: 3 },
-      { label: 'Night', cur: t.night, req: 3 },
-      { label: 'Instrument (hood)', cur: t.instrument + t.simInstrument, req: 3 },
-    ]},
-    { name: 'Instrument Rating', color: 'var(--accent-cyan)', reqs: [
-      { label: 'Instrument Time', cur: t.instrument + t.simInstrument, req: 40 },
-      { label: 'XC PIC', cur: t.crossCountry, req: 50 },
-    ]},
-    { name: 'Commercial Pilot', color: 'var(--accent-amber)', reqs: [
-      { label: 'Total Time', cur: t.totalTime, req: 250 },
-      { label: 'PIC', cur: t.pic, req: 100 },
-      { label: 'XC PIC', cur: t.crossCountry, req: 50 },
-      { label: 'Night', cur: t.night, req: 5 },
-      { label: 'Instrument', cur: t.instrument + t.simInstrument, req: 10 },
-    ]},
-  ];
-
-  const achievements = [
-    { icon: '🌙', name: 'Night Owl', desc: '50+ night hours', unlocked: t.night >= 50 },
-    { icon: '🌍', name: 'Explorer', desc: '100+ XC hours', unlocked: t.crossCountry >= 100 },
-    { icon: '⛈️', name: 'Weather Warrior', desc: '30+ instrument hrs', unlocked: t.instrument >= 30 },
-    { icon: '✈️', name: 'Century Mark', desc: '100+ flights', unlocked: t.flightCount >= 100 },
-    { icon: '🏆', name: 'Iron Pilot', desc: '500+ total hours', unlocked: t.totalTime >= 500 },
-    { icon: '🎯', name: 'Precision', desc: '50+ approaches', unlocked: t.approaches >= 50 },
-  ];
+  const certificates = buildCertificates(totals);
 
   return (
     <div className={styles.page}>
       <div className="container">
         <motion.div className={styles.header} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1>Training & Progress</h1>
-          <p className={styles.subtitle}>Track your progress toward certificates — computed from your logged flights</p>
+          <p className={styles.subtitle}>Minimum requirements for FAA certificates — computed from your logged flights</p>
         </motion.div>
 
-        <h2 className={styles.sectionTitle}>Ratings Progress</h2>
-        <div className={styles.ratingsGrid}>
-          {ratings.map((r, ri) => {
-            const totalProgress = r.reqs.reduce((s, req) => s + Math.min(1, req.cur / req.req), 0) / r.reqs.length * 100;
+        {/* Certificate Progress Cards */}
+        <div className={styles.certsGrid}>
+          {certificates.map((cert, ci) => {
+            const validReqs = cert.reqs.filter((r) => r.req > 0);
+            const overallProgress = validReqs.length > 0
+              ? (validReqs.reduce((s, r) => s + Math.min(1, r.cur / r.req), 0) / validReqs.length) * 100
+              : 0;
+
             return (
-              <motion.div key={r.name} className={styles.ratingCard} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ri * 0.1 }}>
-                <div className={styles.ratingTop}>
-                  <ProgressRing progress={totalProgress} color={r.color} />
-                  <h3 className={styles.ratingName}>{r.name}</h3>
+              <motion.div key={cert.name} className={styles.certCard} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ci * 0.1 }}>
+                <div className={styles.certHeader}>
+                  <ProgressRing progress={overallProgress} color={cert.color} />
+                  <div className={styles.certInfo}>
+                    <h3 className={styles.certName}>{cert.name}</h3>
+                    <span className={styles.certFar}>{cert.subtitle}</span>
+                    <span className={styles.certStatus}>
+                      {overallProgress >= 100 ? (
+                        <span className={styles.metBadge}>✓ Minimums Met</span>
+                      ) : (
+                        <span className={styles.progressText}>{Math.round(overallProgress)}% complete</span>
+                      )}
+                    </span>
+                  </div>
                 </div>
-                <div className={styles.reqs}>
-                  {r.reqs.map((req) => (
-                    <div key={req.label} className={styles.reqRow}>
-                      <div className={styles.reqInfo}>
-                        <span className={styles.reqLabel}>{req.label}</span>
-                        <span className={styles.reqVals}>{req.cur.toFixed(1)} / {req.req} hrs</span>
+
+                <div className={styles.reqsList}>
+                  {cert.reqs.map((req) => {
+                    if (req.req === 0) return null;
+                    const pct = Math.min(100, (req.cur / req.req) * 100);
+                    const met = pct >= 100;
+                    return (
+                      <div key={req.label} className={`${styles.reqRow} ${met ? styles.reqMet : ''}`}>
+                        <div className={styles.reqTop}>
+                          <span className={styles.reqLabel}>
+                            {met && <span className={styles.reqCheck}>✓</span>}
+                            {req.label}
+                          </span>
+                          <span className={styles.reqVals}>
+                            {req.unit === 'hrs' ? req.cur.toFixed(1) : req.cur}
+                            <span className={styles.reqSlash}> / </span>
+                            {req.req}{req.unit ? ` ${req.unit}` : ''}
+                          </span>
+                        </div>
+                        <div className={styles.reqBar}>
+                          <motion.div
+                            className={styles.reqFill}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ duration: 0.8, delay: ci * 0.1 + 0.2 }}
+                            style={{ background: met ? cert.color : cert.color }}
+                          />
+                        </div>
+                        {!met && (
+                          <span className={styles.reqRemaining}>
+                            {req.unit === 'hrs'
+                              ? `${(req.req - req.cur).toFixed(1)} hrs remaining`
+                              : `${req.req - req.cur} remaining`}
+                          </span>
+                        )}
                       </div>
-                      <div className={styles.reqBar}>
-                        <div className={styles.reqFill} style={{ width: `${Math.min(100, (req.cur / req.req) * 100)}%`, background: r.color }} />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </motion.div>
             );
           })}
         </div>
 
-        <h2 className={styles.sectionTitle} style={{ marginTop: 'var(--space-12)' }}>Achievements</h2>
-        <div className={styles.achieveGrid}>
-          {achievements.map((a, i) => (
-            <motion.div key={a.name} className={`${styles.achieveCard} ${a.unlocked ? styles.unlocked : styles.locked}`} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
-              <span className={styles.achieveIcon}>{a.icon}</span>
-              <span className={styles.achieveName}>{a.name}</span>
-              <span className={styles.achieveDesc}>{a.desc}</span>
-              {!a.unlocked && <span className={styles.lockIcon}>🔒</span>}
-            </motion.div>
-          ))}
-        </div>
+        {/* Quick Stats */}
+        <motion.div className={styles.quickStats} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <h2 className={styles.sectionTitle}>Your Flying Summary</h2>
+          <div className={styles.statsGrid}>
+            {[
+              { label: 'Total Time', value: `${totals.totalTime.toFixed(1)} hrs` },
+              { label: 'PIC', value: `${totals.pic.toFixed(1)} hrs` },
+              { label: 'Night', value: `${totals.night.toFixed(1)} hrs` },
+              { label: 'Instrument', value: `${(totals.instrument + totals.simInstrument).toFixed(1)} hrs` },
+              { label: 'Cross-Country', value: `${totals.crossCountry.toFixed(1)} hrs` },
+              { label: 'Dual', value: `${totals.dual.toFixed(1)} hrs` },
+              { label: 'Total Landings', value: totals.landings.toLocaleString() },
+              { label: 'Night Landings', value: totals.nightLandings.toLocaleString() },
+              { label: 'Approaches', value: totals.approaches.toLocaleString() },
+              { label: 'Total Flights', value: totals.flightCount.toLocaleString() },
+            ].map((s) => (
+              <div key={s.label} className={styles.statItem}>
+                <span className={styles.statLabel}>{s.label}</span>
+                <span className={styles.statValue}>{s.value}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </div>
   );

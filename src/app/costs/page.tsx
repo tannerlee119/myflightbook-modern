@@ -230,15 +230,15 @@ export default function CostsPage() {
                   <div className={styles.fg}><label>Date</label><input type="date" value={fcForm.date} onChange={(e) => setFcForm({ ...fcForm, date: e.target.value })} /></div>
                   <div className={styles.fg}><label>Aircraft</label><input value={fcForm.aircraft} onChange={(e) => setFcForm({ ...fcForm, aircraft: e.target.value.toUpperCase() })} placeholder="N172SP" /></div>
                 </div>
-                <div className={styles.formRow3}>
+                <div className={styles.formRow}>
                   <div className={styles.fg}><label>Fuel</label><input type="number" step="0.01" value={fcForm.fuelCost || ''} onChange={(e) => setFcForm({ ...fcForm, fuelCost: numField(e.target.value) })} placeholder="0.00" /></div>
                   <div className={styles.fg}><label>Rental</label><input type="number" step="0.01" value={fcForm.rentalCost || ''} onChange={(e) => setFcForm({ ...fcForm, rentalCost: numField(e.target.value) })} placeholder="0.00" /></div>
+                </div>
+                <div className={styles.formRow}>
                   <div className={styles.fg}><label>Instructor</label><input type="number" step="0.01" value={fcForm.instructorCost || ''} onChange={(e) => setFcForm({ ...fcForm, instructorCost: numField(e.target.value) })} placeholder="0.00" /></div>
-                </div>
-                <div className={styles.formRow3}>
                   <div className={styles.fg}><label>Landing Fees</label><input type="number" step="0.01" value={fcForm.landingFees || ''} onChange={(e) => setFcForm({ ...fcForm, landingFees: numField(e.target.value) })} placeholder="0.00" /></div>
-                  <div className={styles.fg}><label>Other</label><input type="number" step="0.01" value={fcForm.otherCost || ''} onChange={(e) => setFcForm({ ...fcForm, otherCost: numField(e.target.value) })} placeholder="0.00" /></div>
                 </div>
+                <div className={styles.fg}><label>Other</label><input type="number" step="0.01" value={fcForm.otherCost || ''} onChange={(e) => setFcForm({ ...fcForm, otherCost: numField(e.target.value) })} placeholder="0.00" /></div>
                 <div className={styles.fg}><label>Notes</label><input value={fcForm.notes} onChange={(e) => setFcForm({ ...fcForm, notes: e.target.value })} placeholder="Description…" /></div>
                 <button className={`btn btn-primary ${styles.saveBtn}`} onClick={saveFc}>{fcEditId ? 'Save' : 'Add Cost'}</button>
               </div>

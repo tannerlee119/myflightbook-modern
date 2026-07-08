@@ -242,16 +242,18 @@ export default function LogbookPage() {
                   <div className={styles.fg}><label>Total Time</label><input type="number" step="0.1" value={form.totalTime || ''} onChange={(e) => numField('totalTime', e.target.value)} /></div>
                   <div className={styles.fg}><label>PIC</label><input type="number" step="0.1" value={form.pic || ''} onChange={(e) => numField('pic', e.target.value)} /></div>
                   <div className={styles.fg}><label>SIC</label><input type="number" step="0.1" value={form.sic || ''} onChange={(e) => numField('sic', e.target.value)} /></div>
-                  <div className={styles.fg}><label>Dual</label><input type="number" step="0.1" value={form.dual || ''} onChange={(e) => numField('dual', e.target.value)} /></div>
                 </div>
                 <div className={styles.formRow3}>
+                  <div className={styles.fg}><label>Dual</label><input type="number" step="0.1" value={form.dual || ''} onChange={(e) => numField('dual', e.target.value)} /></div>
                   <div className={styles.fg}><label>Night</label><input type="number" step="0.1" value={form.night || ''} onChange={(e) => numField('night', e.target.value)} /></div>
                   <div className={styles.fg}><label>Instrument</label><input type="number" step="0.1" value={form.instrument || ''} onChange={(e) => numField('instrument', e.target.value)} /></div>
-                  <div className={styles.fg}><label>Sim Inst</label><input type="number" step="0.1" value={form.simInstrument || ''} onChange={(e) => numField('simInstrument', e.target.value)} /></div>
-                  <div className={styles.fg}><label>X-Country</label><input type="number" step="0.1" value={form.crossCountry || ''} onChange={(e) => numField('crossCountry', e.target.value)} /></div>
                 </div>
                 <div className={styles.formRow3}>
+                  <div className={styles.fg}><label>Sim Inst</label><input type="number" step="0.1" value={form.simInstrument || ''} onChange={(e) => numField('simInstrument', e.target.value)} /></div>
+                  <div className={styles.fg}><label>X-Country</label><input type="number" step="0.1" value={form.crossCountry || ''} onChange={(e) => numField('crossCountry', e.target.value)} /></div>
                   <div className={styles.fg}><label>Landings</label><input type="number" value={form.landings || ''} onChange={(e) => numField('landings', e.target.value)} /></div>
+                </div>
+                <div className={styles.formRow}>
                   <div className={styles.fg}><label>Night Ldg</label><input type="number" value={form.nightLandings || ''} onChange={(e) => numField('nightLandings', e.target.value)} /></div>
                   <div className={styles.fg}><label>Approaches</label><input type="number" value={form.approaches || ''} onChange={(e) => numField('approaches', e.target.value)} /></div>
                 </div>
