@@ -231,7 +231,7 @@ export default function CostsPage() {
                   <table className={styles.table}>
                     <thead><tr>
                       <th>Date</th><th>Type</th><th>Category</th>
-                      <th className={styles.num}>Amount</th><th>Description</th><th style={{ width: 60 }} />
+                      <th>Amount</th><th>Description</th><th style={{ width: 60 }} />
                     </tr></thead>
                     <tbody>
                       {unified.map((e) => (
@@ -239,7 +239,7 @@ export default function CostsPage() {
                           <td className={styles.dateCell}>{new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                           <td><span className={`${styles.typeBadge} ${e.type === 'flight' ? styles.typeFlight : styles.typeExternal}`}>{e.type === 'flight' ? '✈ Flight' : '📋 External'}</span></td>
                           <td className={styles.catText}>{e.label}</td>
-                          <td className={`${styles.num} ${styles.mono} ${styles.totalCol}`}>{fmtUSD(e.amount)}</td>
+                          <td className={`${styles.mono} ${styles.totalCol}`}>{fmtUSD(e.amount)}</td>
                           <td className={styles.noteCell}>{e.description}</td>
                           <td>
                             <div className={styles.rowActions}>
