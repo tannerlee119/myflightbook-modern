@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   getAircraft, addAircraft, updateAircraft, deleteAircraft,
   getFlights, type Aircraft, type Flight,
-} from '@/lib/storage';
+} from '@/lib/api';
 import styles from './aircraft.module.css';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#f59e0b', '#a855f7', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
@@ -20,21 +20,21 @@ export default function AircraftPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  const reload = useCallback(() => { setAircraft(getAircraft()); setFlights(getFlights()); }, []);
-  useEffect(() => { reload(); setMounted(true); }, [reload]);
+  const reload = useCallback(async () => { setAircraft(await getAircraft()); setFlights(await getFlights()); }, []);
+  useEffect(() => { reload().then(() => setMounted(true)); }, [reload]);
 
   const openAdd = () => { setEditingId(null); setForm({ ...EMPTY, imageColor: COLORS[aircraft.length % COLORS.length] }); setModalOpen(true); };
   const openEdit = (a: Aircraft) => { setEditingId(a.id); setForm({ tailNumber: a.tailNumber, model: a.model, year: a.year, category: a.category, notes: a.notes, imageColor: a.imageColor }); setModalOpen(true); };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.tailNumber || !form.model) return;
-    if (editingId) updateAircraft(editingId, form);
-    else addAircraft(form);
+    if (editingId) await updateAircraft(editingId, form);
+    else await addAircraft(form);
     setModalOpen(false);
-    reload();
+    await reload();
   };
 
-  const handleDelete = (id: string) => { deleteAircraft(id); setDeleteConfirm(null); reload(); };
+  const handleDelete = async (id: string) => { await deleteAircraft(id); setDeleteConfirm(null); await reload(); };
 
   const acFlights = (tail: string) => flights.filter((f) => f.aircraft === tail);
   const acHours = (tail: string) => acFlights(tail).reduce((s, f) => s + f.totalTime, 0);

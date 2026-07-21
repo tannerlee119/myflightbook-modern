@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SeedProvider from "@/components/SeedProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -21,7 +20,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="noise-overlay">
-        <SeedProvider />
         <Header />
         <main style={{ paddingTop: 'var(--header-height)' }}>{children}</main>
         <Footer />

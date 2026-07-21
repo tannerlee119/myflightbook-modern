@@ -7,7 +7,7 @@ import {
   getAircraft, computeTotals, computeCurrency,
   getFlightCosts, addFlightCost, updateFlightCost,
   type Flight, type Aircraft as AircraftType, type FlightTotals, type CurrencyItem,
-} from '@/lib/storage';
+} from '@/lib/api';
 import styles from './logbook.module.css';
 
 type Tab = 'flights' | 'totals' | 'currency';
@@ -35,25 +35,26 @@ export default function LogbookPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  const reload = useCallback(() => {
-    const f = getFlights();
+  const reload = useCallback(async () => {
+    const f = await getFlights();
     setFlights(f);
     setTotals(computeTotals(f));
     setCurrency(computeCurrency(f));
-    setAircraft(getAircraft());
+    setAircraft(await getAircraft());
   }, []);
 
-  useEffect(() => { reload(); setMounted(true); }, [reload]);
+  useEffect(() => { reload().then(() => setMounted(true)); }, [reload]);
 
   const filtered = flights.filter((f) =>
     [f.aircraft, f.model, f.route, f.comments, f.date].join(' ').toLowerCase().includes(search.toLowerCase())
   );
 
   const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setModalOpen(true); };
-  const openEdit = (f: Flight) => {
+  const openEdit = async (f: Flight) => {
     setEditingId(f.id);
     // Find linked cost total
-    const linkedCost = getFlightCosts().find((c) => c.flightId === f.id);
+    const allCosts = await getFlightCosts();
+    const linkedCost = allCosts.find((c) => c.flightId === f.id);
     const costTotal = linkedCost ? linkedCost.fuelCost + linkedCost.rentalCost + linkedCost.instructorCost + linkedCost.landingFees + linkedCost.otherCost : 0;
     setForm({
       date: f.date, aircraft: f.aircraft, model: f.model, route: f.route,
@@ -66,9 +67,8 @@ export default function LogbookPage() {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.date || !form.aircraft) return;
-    // Auto-fill model from aircraft list
     let model = form.model;
     if (!model) {
       const ac = aircraft.find((a) => a.tailNumber === form.aircraft);
@@ -79,35 +79,35 @@ export default function LogbookPage() {
     let flightId = editingId;
 
     if (editingId) {
-      updateFlight(editingId, payload);
+      await updateFlight(editingId, payload);
     } else {
-      const created = addFlight(payload);
+      const created = await addFlight(payload);
       flightId = created.id;
     }
 
-    // Auto-create/update linked cost if cost is filled
     if (flightCost > 0 && flightId) {
-      const existingCost = getFlightCosts().find((c) => c.flightId === flightId);
+      const allCosts = await getFlightCosts();
+      const existingCost = allCosts.find((c) => c.flightId === flightId);
       const costData = {
         flightId, date: form.date, aircraft: form.aircraft,
         fuelCost: 0, rentalCost: flightCost, instructorCost: 0, landingFees: 0, otherCost: 0,
         notes: form.route || '',
       };
       if (existingCost) {
-        updateFlightCost(existingCost.id, costData);
+        await updateFlightCost(existingCost.id, costData);
       } else {
-        addFlightCost(costData);
+        await addFlightCost(costData);
       }
     }
 
     setModalOpen(false);
-    reload();
+    await reload();
   };
 
-  const handleDelete = (id: string) => {
-    deleteFlight(id);
+  const handleDelete = async (id: string) => {
+    await deleteFlight(id);
     setDeleteConfirm(null);
-    reload();
+    await reload();
   };
 
   const setField = (key: string, value: string | number) => setForm((prev) => ({ ...prev, [key]: value }));

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getFlights, computeTotals, type FlightTotals } from '@/lib/storage';
+import { getFlights, computeTotals, type FlightTotals } from '@/lib/api';
 import styles from './training.module.css';
 
 function ProgressRing({ progress, color, size = 110 }: { progress: number; color: string; size?: number }) {
@@ -91,8 +91,10 @@ export default function TrainingPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setTotals(computeTotals(getFlights()));
-    setMounted(true);
+    getFlights().then((f) => {
+      setTotals(computeTotals(f));
+      setMounted(true);
+    });
   }, []);
 
   if (!mounted || !totals) return <div className={styles.page} />;

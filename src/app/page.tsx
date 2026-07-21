@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  getFlights, getAircraft, computeTotals, computeCurrency,
-  computeCostSummary, type Flight, type CurrencyItem, type FlightTotals,
-} from '@/lib/storage';
+  getFlights, getAircraft, getFlightCosts, getExternalCosts,
+  computeTotals, computeCurrency, computeCostSummary,
+  type Flight, type CurrencyItem, type FlightTotals, type CostSummary,
+} from '@/lib/api';
 import styles from './home.module.css';
 
 export default function Dashboard() {
@@ -14,17 +15,22 @@ export default function Dashboard() {
   const [totals, setTotals] = useState<FlightTotals | null>(null);
   const [currency, setCurrency] = useState<CurrencyItem[]>([]);
   const [aircraftCount, setAircraftCount] = useState(0);
-  const [costSummary, setCostSummary] = useState<ReturnType<typeof computeCostSummary> | null>(null);
+  const [costSummary, setCostSummary] = useState<CostSummary | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const f = getFlights();
-    setFlights(f);
-    setTotals(computeTotals(f));
-    setCurrency(computeCurrency(f));
-    setAircraftCount(getAircraft().length);
-    setCostSummary(computeCostSummary());
-    setMounted(true);
+    (async () => {
+      const f = await getFlights();
+      setFlights(f);
+      setTotals(computeTotals(f));
+      setCurrency(computeCurrency(f));
+      const ac = await getAircraft();
+      setAircraftCount(ac.length);
+      const fc = await getFlightCosts();
+      const ec = await getExternalCosts();
+      setCostSummary(computeCostSummary(fc, ec));
+      setMounted(true);
+    })();
   }, []);
 
   if (!mounted) return <div className={styles.page} />;

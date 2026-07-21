@@ -6,7 +6,7 @@ import {
   getFlightCosts, getExternalCosts, addExternalCost, updateExternalCost, deleteExternalCost,
   deleteFlightCost, computeCostSummary, getFlights, computeTotals,
   EXTERNAL_COST_LABELS, type FlightCost, type ExternalCost, type ExternalCostCategory,
-} from '@/lib/storage';
+} from '@/lib/api';
 import styles from './costs.module.css';
 
 type Tab = 'summary' | 'all';
@@ -37,17 +37,19 @@ export default function CostsPage() {
   const [deleteId, setDeleteId] = useState<{ id: string; type: 'fc' | 'ec' } | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  const reload = useCallback(() => {
-    setFlightCosts(getFlightCosts());
-    setExternalCosts(getExternalCosts());
-    setSummary(computeCostSummary());
-    const flights = getFlights();
+  const reload = useCallback(async () => {
+    const fc = await getFlightCosts();
+    const ec = await getExternalCosts();
+    setFlightCosts(fc);
+    setExternalCosts(ec);
+    setSummary(computeCostSummary(fc, ec));
+    const flights = await getFlights();
     const t = computeTotals(flights);
     setTotalHours(t.totalTime);
     setTotalFlights(flights.length);
   }, []);
 
-  useEffect(() => { reload(); setMounted(true); }, [reload]);
+  useEffect(() => { reload().then(() => setMounted(true)); }, [reload]);
 
   const fmtUSD = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const fmtUSD0 = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -75,14 +77,14 @@ export default function CostsPage() {
   // External cost handlers
   const openAddEc = () => { setEcEditId(null); setEcForm(EMPTY_EC); setEcModal(true); };
   const openEditEc = (c: ExternalCost) => { setEcEditId(c.id); setEcForm({ date: c.date, category: c.category, amount: c.amount, description: c.description }); setEcModal(true); };
-  const saveEc = () => { if (ecEditId) updateExternalCost(ecEditId, ecForm); else addExternalCost(ecForm); setEcModal(false); reload(); };
+  const saveEc = async () => { if (ecEditId) await updateExternalCost(ecEditId, ecForm); else await addExternalCost(ecForm); setEcModal(false); await reload(); };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return;
-    if (deleteId.type === 'fc') deleteFlightCost(deleteId.id);
-    else deleteExternalCost(deleteId.id);
+    if (deleteId.type === 'fc') await deleteFlightCost(deleteId.id);
+    else await deleteExternalCost(deleteId.id);
     setDeleteId(null);
-    reload();
+    await reload();
   };
 
   // Category breakdown for summary
