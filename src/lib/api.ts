@@ -220,7 +220,7 @@ export function computeTotals(flights: Flight[]): FlightTotals {
   );
 }
 
-export function computeCurrency(flights: Flight[]): CurrencyItem[] {
+export function computeCurrency(flights: Flight[], externalCosts?: ExternalCost[]): CurrencyItem[] {
   const now = new Date();
   const ninetyDaysAgo = new Date(now);
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -235,18 +235,49 @@ export function computeCurrency(flights: Flight[]): CurrencyItem[] {
   const recentApproaches = flights.filter((f) => f.date >= sixStr).reduce((s, f) => s + (f.approaches || 0), 0);
 
   // Flight review — look for most recent dual received flight as a proxy
-  // (User should set flight review date via the currency settings in the future)
   const twentyFourMonthsAgo = new Date(now);
   twentyFourMonthsAgo.setMonth(twentyFourMonthsAgo.getMonth() - 24);
   const twentyFourStr = twentyFourMonthsAgo.toISOString().split('T')[0];
   const hasBFR = flights.some((f) => f.dual > 0 && f.date >= twentyFourStr);
+
+  // Medical certificate — detect from external costs with category 'medical'
+  // First class medical valid for 6 calendar months from issue date
+  let medicalItem: CurrencyItem;
+  const medicalCosts = (externalCosts || [])
+    .filter((c) => c.category === 'medical')
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  if (medicalCosts.length > 0) {
+    const latestMedical = medicalCosts[0];
+    const issueDate = new Date(latestMedical.date + 'T12:00:00');
+    // Valid through end of 6th calendar month after issue
+    const expiryDate = new Date(issueDate);
+    expiryDate.setMonth(expiryDate.getMonth() + 6);
+    // FAA medical expires at end of month — set to last day of that month
+    expiryDate.setDate(0); // goes to last day of previous month (i.e. end of the 6th month)
+    expiryDate.setDate(expiryDate.getDate() + 1); // first of next month
+    // Actually: end of the calendar month that is 6 months from issue
+    const expMonth = new Date(issueDate);
+    expMonth.setMonth(expMonth.getMonth() + 7);
+    expMonth.setDate(0); // last day of 6th month after issue
+    
+    const daysLeft = Math.ceil((expMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const expiryStr = expMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const status: CurrencyItem['status'] = daysLeft > 30 ? 'current' : daysLeft > 0 ? 'warning' : 'expired';
+    const detail = daysLeft > 0
+      ? `Expires ${expiryStr} (${daysLeft} days) · ${latestMedical.description || '1st Class'}`
+      : `Expired ${expiryStr} · ${latestMedical.description || '1st Class'}`;
+    medicalItem = { name: 'Medical Certificate', status, detail };
+  } else {
+    medicalItem = { name: 'Medical Certificate', status: 'unknown', detail: 'Log a medical cost to auto-track' };
+  }
 
   return [
     { name: 'Day Passenger Currency', status: recentLandings >= 3 ? 'current' : recentLandings >= 1 ? 'warning' : 'expired', detail: `${recentLandings} of 3 landings in last 90 days` },
     { name: 'Night Passenger Currency', status: recentNightLandings >= 3 ? 'current' : recentNightLandings >= 1 ? 'warning' : 'expired', detail: `${recentNightLandings} of 3 night full-stop landings in 90 days` },
     { name: 'Instrument Currency (FAR 61.57)', status: recentApproaches >= 6 ? 'current' : recentApproaches >= 3 ? 'warning' : 'expired', detail: `${recentApproaches} of 6 approaches in last 6 months` },
     { name: 'Flight Review (FAR 61.56)', status: hasBFR ? 'current' : 'expired', detail: hasBFR ? 'Dual received within 24 calendar months' : 'No dual received in last 24 months' },
-    { name: 'Medical Certificate', status: 'unknown', detail: 'Set your medical expiry in settings' },
+    medicalItem,
   ];
 }
 

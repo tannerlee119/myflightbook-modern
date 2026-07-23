@@ -21,13 +21,13 @@ export default function Dashboard() {
   useEffect(() => {
     (async () => {
       const f = await getFlights();
-      setFlights(f);
-      setTotals(computeTotals(f));
-      setCurrency(computeCurrency(f));
       const ac = await getAircraft();
-      setAircraftCount(ac.length);
       const fc = await getFlightCosts();
       const ec = await getExternalCosts();
+      setFlights(f);
+      setTotals(computeTotals(f));
+      setCurrency(computeCurrency(f, ec));
+      setAircraftCount(ac.length);
       setCostSummary(computeCostSummary(fc, ec));
       setMounted(true);
     })();

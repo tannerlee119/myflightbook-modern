@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   getFlights, addFlight, updateFlight, deleteFlight,
-  getAircraft, computeTotals, computeCurrency,
+  getAircraft, getExternalCosts, computeTotals, computeCurrency,
   getFlightCosts, addFlightCost, updateFlightCost,
   type Flight, type Aircraft as AircraftType, type FlightTotals, type CurrencyItem,
 } from '@/lib/api';
@@ -36,9 +36,10 @@ export default function LogbookPage() {
 
   const reload = useCallback(async () => {
     const f = await getFlights();
+    const ec = await getExternalCosts();
     setFlights(f);
     setTotals(computeTotals(f));
-    setCurrency(computeCurrency(f));
+    setCurrency(computeCurrency(f, ec));
     setAircraft(await getAircraft());
   }, []);
 
