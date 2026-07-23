@@ -45,10 +45,39 @@ export async function GET() {
     const recentNightLandings = recent.reduce((s, f) => s + (f.nightLandings ?? 0), 0);
     const recentApproaches = allFlights.filter((f) => f.date >= sixStr).reduce((s, f) => s + (f.approaches ?? 0), 0);
 
+    // Flight review
+    const twentyFourMonthsAgo = new Date(now);
+    twentyFourMonthsAgo.setMonth(twentyFourMonthsAgo.getMonth() - 24);
+    const twentyFourStr = twentyFourMonthsAgo.toISOString().split('T')[0];
+    const hasBFR = allFlights.some((f) => (f.dual ?? 0) > 0 && f.date >= twentyFourStr);
+
+    // Medical certificate from external costs
+    const medicalCosts = allExternalCosts
+      .filter((c) => c.category === 'medical')
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    type CurrencyStatus = 'current' | 'warning' | 'expired' | 'unknown';
+    let medicalStatus: CurrencyStatus = 'unknown';
+    let medicalDetail = 'Log a medical cost to auto-track';
+    if (medicalCosts.length > 0) {
+      const issueDate = new Date(medicalCosts[0].date + 'T12:00:00');
+      const expMonth = new Date(issueDate);
+      expMonth.setMonth(expMonth.getMonth() + 7);
+      expMonth.setDate(0); // last day of 6th month after issue
+      const daysLeft = Math.ceil((expMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const expiryStr = expMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      medicalStatus = daysLeft > 30 ? 'current' : daysLeft > 0 ? 'warning' : 'expired';
+      medicalDetail = daysLeft > 0
+        ? `Expires ${expiryStr} (${daysLeft} days) · ${medicalCosts[0].description || '1st Class'}`
+        : `Expired ${expiryStr} · ${medicalCosts[0].description || '1st Class'}`;
+    }
+
     const currency = [
       { name: 'Day Passenger Currency', status: recentLandings >= 3 ? 'current' : recentLandings >= 1 ? 'warning' : 'expired', detail: `${recentLandings} of 3 landings in last 90 days` },
       { name: 'Night Passenger Currency', status: recentNightLandings >= 3 ? 'current' : recentNightLandings >= 1 ? 'warning' : 'expired', detail: `${recentNightLandings} of 3 night full-stop landings in 90 days` },
       { name: 'Instrument Currency (FAR 61.57)', status: recentApproaches >= 6 ? 'current' : recentApproaches >= 3 ? 'warning' : 'expired', detail: `${recentApproaches} of 6 approaches in last 6 months` },
+      { name: 'Flight Review (FAR 61.56)', status: hasBFR ? 'current' : 'expired', detail: hasBFR ? 'Dual received within 24 calendar months' : 'No dual received in last 24 months' },
+      { name: 'Medical Certificate', status: medicalStatus, detail: medicalDetail },
     ];
 
     // Cost summary
