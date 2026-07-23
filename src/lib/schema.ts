@@ -12,6 +12,7 @@ export const flights = pgTable('flights', {
   pic: real('pic').notNull().default(0),
   sic: real('sic').notNull().default(0),
   dual: real('dual').notNull().default(0),
+  dualGiven: real('dual_given').notNull().default(0),
   night: real('night').notNull().default(0),
   instrument: real('instrument').notNull().default(0),
   simInstrument: real('sim_instrument').notNull().default(0),

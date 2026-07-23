@@ -82,7 +82,7 @@ export default function Dashboard() {
                 {recentFlights.map((f) => (
                   <div key={f.id} className={styles.flightRow}>
                     <div className={styles.flightDate}>
-                      {new Date(f.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {new Date(f.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                     <div className={styles.flightInfo}>
                       <span className={styles.flightRoute}>{f.route || '—'}</span>

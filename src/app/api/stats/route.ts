@@ -12,7 +12,7 @@ export async function GET() {
 
     // Totals
     const totals = {
-      totalTime: 0, pic: 0, sic: 0, dual: 0, night: 0,
+      totalTime: 0, pic: 0, sic: 0, dual: 0, dualGiven: 0, night: 0,
       instrument: 0, simInstrument: 0, crossCountry: 0,
       landings: 0, nightLandings: 0, approaches: 0, flightCount: allFlights.length,
     };
@@ -21,6 +21,7 @@ export async function GET() {
       totals.pic += f.pic ?? 0;
       totals.sic += f.sic ?? 0;
       totals.dual += f.dual ?? 0;
+      totals.dualGiven += f.dualGiven ?? 0;
       totals.night += f.night ?? 0;
       totals.instrument += f.instrument ?? 0;
       totals.simInstrument += f.simInstrument ?? 0;

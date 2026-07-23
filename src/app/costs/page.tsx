@@ -238,7 +238,7 @@ export default function CostsPage() {
                     <tbody>
                       {unified.map((e) => (
                         <tr key={`${e.type}-${e.id}`} className={styles.row}>
-                          <td className={styles.dateCell}>{new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                          <td className={styles.dateCell}>{new Date(e.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                           <td><span className={`${styles.typeBadge} ${e.type === 'flight' ? styles.typeFlight : styles.typeExternal}`}>{e.type === 'flight' ? '✈ Flight' : '📋 External'}</span></td>
                           <td className={styles.catText}>{e.label}</td>
                           <td className={`${styles.mono} ${styles.totalCol}`}>{fmtUSD(e.amount)}</td>

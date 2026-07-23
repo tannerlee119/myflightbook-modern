@@ -14,6 +14,7 @@ export interface Flight {
   pic: number;
   sic: number;
   dual: number;
+  dualGiven: number;
   night: number;
   instrument: number;
   simInstrument: number;
@@ -72,7 +73,7 @@ export const EXTERNAL_COST_LABELS: Record<ExternalCostCategory, string> = {
 };
 
 export interface FlightTotals {
-  totalTime: number; pic: number; sic: number; dual: number;
+  totalTime: number; pic: number; sic: number; dual: number; dualGiven: number;
   night: number; instrument: number; simInstrument: number;
   crossCountry: number; landings: number; nightLandings: number;
   approaches: number; flightCount: number;
@@ -205,6 +206,7 @@ export function computeTotals(flights: Flight[]): FlightTotals {
       pic: acc.pic + (f.pic || 0),
       sic: acc.sic + (f.sic || 0),
       dual: acc.dual + (f.dual || 0),
+      dualGiven: acc.dualGiven + (f.dualGiven || 0),
       night: acc.night + (f.night || 0),
       instrument: acc.instrument + (f.instrument || 0),
       simInstrument: acc.simInstrument + (f.simInstrument || 0),
@@ -214,7 +216,7 @@ export function computeTotals(flights: Flight[]): FlightTotals {
       approaches: acc.approaches + (f.approaches || 0),
       flightCount: acc.flightCount + 1,
     }),
-    { totalTime: 0, pic: 0, sic: 0, dual: 0, night: 0, instrument: 0, simInstrument: 0, crossCountry: 0, landings: 0, nightLandings: 0, approaches: 0, flightCount: 0 }
+    { totalTime: 0, pic: 0, sic: 0, dual: 0, dualGiven: 0, night: 0, instrument: 0, simInstrument: 0, crossCountry: 0, landings: 0, nightLandings: 0, approaches: 0, flightCount: 0 }
   );
 }
 
@@ -232,10 +234,19 @@ export function computeCurrency(flights: Flight[]): CurrencyItem[] {
   const recentNightLandings = recent.reduce((s, f) => s + (f.nightLandings || 0), 0);
   const recentApproaches = flights.filter((f) => f.date >= sixStr).reduce((s, f) => s + (f.approaches || 0), 0);
 
+  // Flight review — look for most recent dual received flight as a proxy
+  // (User should set flight review date via the currency settings in the future)
+  const twentyFourMonthsAgo = new Date(now);
+  twentyFourMonthsAgo.setMonth(twentyFourMonthsAgo.getMonth() - 24);
+  const twentyFourStr = twentyFourMonthsAgo.toISOString().split('T')[0];
+  const hasBFR = flights.some((f) => f.dual > 0 && f.date >= twentyFourStr);
+
   return [
     { name: 'Day Passenger Currency', status: recentLandings >= 3 ? 'current' : recentLandings >= 1 ? 'warning' : 'expired', detail: `${recentLandings} of 3 landings in last 90 days` },
     { name: 'Night Passenger Currency', status: recentNightLandings >= 3 ? 'current' : recentNightLandings >= 1 ? 'warning' : 'expired', detail: `${recentNightLandings} of 3 night full-stop landings in 90 days` },
     { name: 'Instrument Currency (FAR 61.57)', status: recentApproaches >= 6 ? 'current' : recentApproaches >= 3 ? 'warning' : 'expired', detail: `${recentApproaches} of 6 approaches in last 6 months` },
+    { name: 'Flight Review (FAR 61.56)', status: hasBFR ? 'current' : 'expired', detail: hasBFR ? 'Dual received within 24 calendar months' : 'No dual received in last 24 months' },
+    { name: 'Medical Certificate', status: 'unknown', detail: 'Set your medical expiry in settings' },
   ];
 }
 

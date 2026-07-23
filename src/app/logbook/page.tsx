@@ -15,10 +15,9 @@ type Tab = 'flights' | 'totals' | 'currency';
 const EMPTY_FORM = {
   date: new Date().toISOString().split('T')[0],
   aircraft: '', model: '', route: '',
-  totalTime: 0, pic: 0, sic: 0, dual: 0,
+  totalTime: 0, pic: 0, sic: 0, dual: 0, dualGiven: 0,
   night: 0, instrument: 0, simInstrument: 0, crossCountry: 0,
   landings: 0, nightLandings: 0, approaches: 0, comments: '',
-  // Single overall cost (optional)
   flightCost: 0,
 };
 
@@ -58,7 +57,7 @@ export default function LogbookPage() {
     const costTotal = linkedCost ? linkedCost.fuelCost + linkedCost.rentalCost + linkedCost.instructorCost + linkedCost.landingFees + linkedCost.otherCost : 0;
     setForm({
       date: f.date, aircraft: f.aircraft, model: f.model, route: f.route,
-      totalTime: f.totalTime, pic: f.pic, sic: f.sic, dual: f.dual,
+      totalTime: f.totalTime, pic: f.pic, sic: f.sic, dual: f.dual, dualGiven: f.dualGiven,
       night: f.night, instrument: f.instrument, simInstrument: f.simInstrument,
       crossCountry: f.crossCountry, landings: f.landings, nightLandings: f.nightLandings,
       approaches: f.approaches, comments: f.comments,
@@ -168,7 +167,7 @@ export default function LogbookPage() {
                     <tbody>
                       {filtered.map((f, i) => (
                         <motion.tr key={f.id} className={styles.row} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}>
-                          <td className={styles.dateCell}>{new Date(f.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+                          <td className={styles.dateCell}>{new Date(f.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
                           <td><span className={styles.tail}>{f.aircraft}</span></td>
                           <td className={styles.routeCell}>{f.route}</td>
                           <td className={`${styles.num} ${styles.mono}`}>{f.totalTime.toFixed(1)}</td>
@@ -199,6 +198,7 @@ export default function LogbookPage() {
                   { l: 'Total Time', v: totals.totalTime, u: 'hrs' },
                   { l: 'PIC', v: totals.pic, u: 'hrs' },
                   { l: 'Dual Received', v: totals.dual, u: 'hrs' },
+                  { l: 'Dual Given', v: totals.dualGiven, u: 'hrs' },
                   { l: 'Night', v: totals.night, u: 'hrs' },
                   { l: 'Instrument', v: totals.instrument, u: 'hrs' },
                   { l: 'Sim Instrument', v: totals.simInstrument, u: 'hrs' },
@@ -229,7 +229,7 @@ export default function LogbookPage() {
                       <span className={styles.currencyDetail}>{c.detail}</span>
                     </div>
                     <span className={`${styles.badge} ${styles[`badge_${c.status}`]}`}>
-                      {c.status === 'current' ? 'Current' : c.status === 'warning' ? 'Caution' : 'Expired'}
+                      {c.status === 'current' ? 'Current' : c.status === 'warning' ? 'Caution' : c.status === 'unknown' ? 'Not Set' : 'Expired'}
                     </span>
                   </motion.div>
                 ))}
@@ -265,18 +265,23 @@ export default function LogbookPage() {
                   </div>
                 </div>
                 <div className={styles.fg}><label>Route</label><input value={form.route} onChange={(e) => setField('route', e.target.value)} placeholder="KPAO → KSQL → KPAO" /></div>
-                <div className={styles.formRow3}>
+                <div className={styles.formRow}>
                   <div className={styles.fg}><label>Total Time</label><input type="number" step="0.1" value={form.totalTime || ''} onChange={(e) => numField('totalTime', e.target.value)} /></div>
                   <div className={styles.fg}><label>PIC</label><input type="number" step="0.1" value={form.pic || ''} onChange={(e) => numField('pic', e.target.value)} /></div>
+                </div>
+                <div className={styles.formRow}>
                   <div className={styles.fg}><label>SIC</label><input type="number" step="0.1" value={form.sic || ''} onChange={(e) => numField('sic', e.target.value)} /></div>
-                </div>
-                <div className={styles.formRow3}>
-                  <div className={styles.fg}><label>Dual</label><input type="number" step="0.1" value={form.dual || ''} onChange={(e) => numField('dual', e.target.value)} /></div>
                   <div className={styles.fg}><label>Night</label><input type="number" step="0.1" value={form.night || ''} onChange={(e) => numField('night', e.target.value)} /></div>
-                  <div className={styles.fg}><label>Instrument</label><input type="number" step="0.1" value={form.instrument || ''} onChange={(e) => numField('instrument', e.target.value)} /></div>
                 </div>
-                <div className={styles.formRow3}>
+                <div className={styles.formRow}>
+                  <div className={styles.fg}><label>Dual Received</label><input type="number" step="0.1" value={form.dual || ''} onChange={(e) => numField('dual', e.target.value)} /></div>
+                  <div className={styles.fg}><label>Dual Given</label><input type="number" step="0.1" value={form.dualGiven || ''} onChange={(e) => numField('dualGiven', e.target.value)} /></div>
+                </div>
+                <div className={styles.formRow}>
+                  <div className={styles.fg}><label>Instrument</label><input type="number" step="0.1" value={form.instrument || ''} onChange={(e) => numField('instrument', e.target.value)} /></div>
                   <div className={styles.fg}><label>Sim Inst</label><input type="number" step="0.1" value={form.simInstrument || ''} onChange={(e) => numField('simInstrument', e.target.value)} /></div>
+                </div>
+                <div className={styles.formRow}>
                   <div className={styles.fg}><label>X-Country</label><input type="number" step="0.1" value={form.crossCountry || ''} onChange={(e) => numField('crossCountry', e.target.value)} /></div>
                   <div className={styles.fg}><label>Landings</label><input type="number" value={form.landings || ''} onChange={(e) => numField('landings', e.target.value)} /></div>
                 </div>
