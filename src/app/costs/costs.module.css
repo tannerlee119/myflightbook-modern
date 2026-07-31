@@ -78,7 +78,7 @@
 
 /* Modals */
 .overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: var(--space-4); }
-.modal { width: 100%; max-width: 520px; background: var(--black-card); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-xl); overflow-x: hidden; }
+.modal { width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; background: var(--black-card); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-xl); overflow-x: hidden; }
 .modalHead { display: flex; align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-6); border-bottom: 1px solid rgba(255,255,255,0.05); }
 .modalHead h3 { font-size: var(--text-lg); }
 .modalClose { color: var(--gray-500); font-size: var(--text-lg); cursor: pointer; background: none; border: none; }
@@ -101,5 +101,9 @@
   .summaryCards { grid-template-columns: repeat(2, 1fr); }
   .splitRow { grid-template-columns: 1fr; }
   .barChart { height: 120px; }
+  .overlay { align-items: flex-start; padding: 0; }
+  .modal { max-height: 100vh; max-height: 100dvh; border-radius: 0; border: none; }
+  .modalBody { padding: var(--space-4) var(--space-5); }
+  .formRow { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) { .summaryCards { grid-template-columns: 1fr; } }

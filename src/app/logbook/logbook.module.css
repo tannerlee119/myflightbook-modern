@@ -112,6 +112,9 @@
 @media (max-width: 768px) {
   .totalsGrid { grid-template-columns: repeat(2, 1fr); }
   .currencyItem { flex-wrap: wrap; }
+  .overlay { align-items: flex-start; padding: 0; }
+  .modal { max-height: 100vh; max-height: 100dvh; border-radius: 0; border: none; }
+  .modalBody { padding: var(--space-4) var(--space-5); }
 }
 @media (max-width: 480px) {
   .totalsGrid { grid-template-columns: 1fr; }

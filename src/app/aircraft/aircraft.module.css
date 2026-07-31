@@ -30,7 +30,7 @@
 
 /* Modal */
 .overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: var(--space-4); }
-.modal { width: 100%; max-width: 500px; background: var(--black-card); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-xl); overflow-x: hidden; }
+.modal { width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; background: var(--black-card); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-xl); overflow-x: hidden; }
 .modalHead { display: flex; align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-6); border-bottom: 1px solid rgba(255,255,255,0.05); }
 .modalHead h3 { font-size: var(--text-lg); }
 .modalClose { color: var(--gray-500); font-size: var(--text-lg); cursor: pointer; background: none; border: none; }
@@ -55,4 +55,10 @@
 .confirmActions { display: flex; gap: var(--space-3); justify-content: center; }
 .confirmDel { padding: var(--space-2) var(--space-6); background: var(--accent-red); color: var(--white); border: none; border-radius: var(--radius-md); font-weight: 600; font-size: var(--text-sm); cursor: pointer; }
 
-@media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr; }
+  .overlay { align-items: flex-start; padding: 0; }
+  .modal { max-height: 100vh; max-height: 100dvh; border-radius: 0; border: none; }
+  .modalBody { padding: var(--space-4) var(--space-5); }
+  .formRow { grid-template-columns: 1fr; }
+}
